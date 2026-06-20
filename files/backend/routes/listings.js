@@ -5,24 +5,31 @@ import { getDB } from "../db/connection.js";
 const router = Router();
 const COLLECTION = "listings";
 
-const VALID_CATEGORIES = ["Academic", "Furniture", "Clothing", "Electronics", "Other"];
-const VALID_TYPES = ["sell", "swap", "free"];
+const CATEGORIES = ["Academic", "Furniture", "Clothing", "Electronics", "Other"];
+const TYPES = ["sell", "swap", "free"];
 
-// GET /api/listings — list all, with optional ?category= and ?type= and ?q= filters
+function priceFor(type, price) {
+  if (type !== "sell") return null;
+  const n = Number(price);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
+// GET /api/listings  (optional ?category= ?type= ?q=)
 router.get("/", async (req, res) => {
   try {
     const { category, type, q } = req.query;
-    const filter = {};
-    if (category && VALID_CATEGORIES.includes(category)) filter.category = category;
-    if (type && VALID_TYPES.includes(type)) filter.type = type;
-    if (q) filter.$text = { $search: q };
+    const query = {};
+    if (category && CATEGORIES.includes(category)) query.category = category;
+    if (type && TYPES.includes(type)) query.type = type;
+    if (q) query.$text = { $search: q };
 
-    const listings = await getDB()
+    const items = await getDB()
       .collection(COLLECTION)
-      .find(filter)
+      .find(query)
       .sort({ createdAt: -1 })
       .toArray();
-    res.json(listings);
+
+    res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -31,11 +38,11 @@ router.get("/", async (req, res) => {
 // GET /api/listings/:id
 router.get("/:id", async (req, res) => {
   try {
-    const listing = await getDB()
+    const item = await getDB()
       .collection(COLLECTION)
       .findOne({ _id: new ObjectId(req.params.id) });
-    if (!listing) return res.status(404).json({ error: "Listing not found" });
-    res.json(listing);
+    if (!item) return res.status(404).json({ error: "Listing not found" });
+    res.json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -45,25 +52,29 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { title, description, category, type, price, contact } = req.body;
+
     if (!title || !category || !type || !contact) {
-      return res.status(400).json({ error: "title, category, type, and contact are required" });
+      return res
+        .status(400)
+        .json({ error: "title, category, type, and contact are required" });
     }
-    if (!VALID_CATEGORIES.includes(category)) {
-      return res.status(400).json({ error: `category must be one of: ${VALID_CATEGORIES.join(", ")}` });
+    if (!CATEGORIES.includes(category)) {
+      return res.status(400).json({ error: "Invalid category" });
     }
-    if (!VALID_TYPES.includes(type)) {
-      return res.status(400).json({ error: `type must be one of: ${VALID_TYPES.join(", ")}` });
+    if (!TYPES.includes(type)) {
+      return res.status(400).json({ error: "Invalid type" });
     }
 
+    const now = new Date();
     const doc = {
       title: title.trim(),
-      description: description?.trim() || "",
+      description: (description || "").trim(),
       category,
       type,
-      price: type === "sell" ? (parseFloat(price) || 0) : null,
+      price: priceFor(type, price),
       contact: contact.trim(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     };
 
     const result = await getDB().collection(COLLECTION).insertOne(doc);
@@ -81,18 +92,20 @@ router.patch("/:id", async (req, res) => {
 
     if (title) updates.title = title.trim();
     if (description !== undefined) updates.description = description.trim();
+    if (contact) updates.contact = contact.trim();
     if (category) {
-      if (!VALID_CATEGORIES.includes(category))
-        return res.status(400).json({ error: `Invalid category` });
+      if (!CATEGORIES.includes(category))
+        return res.status(400).json({ error: "Invalid category" });
       updates.category = category;
     }
     if (type) {
-      if (!VALID_TYPES.includes(type))
-        return res.status(400).json({ error: `Invalid type` });
+      if (!TYPES.includes(type))
+        return res.status(400).json({ error: "Invalid type" });
       updates.type = type;
     }
-    if (price !== undefined) updates.price = parseFloat(price) || 0;
-    if (contact) updates.contact = contact.trim();
+    if (type || price !== undefined) {
+      updates.price = priceFor(updates.type || type, price);
+    }
 
     const result = await getDB()
       .collection(COLLECTION)
@@ -115,7 +128,8 @@ router.delete("/:id", async (req, res) => {
     const result = await getDB()
       .collection(COLLECTION)
       .deleteOne({ _id: new ObjectId(req.params.id) });
-    if (result.deletedCount === 0) return res.status(404).json({ error: "Listing not found" });
+    if (result.deletedCount === 0)
+      return res.status(404).json({ error: "Listing not found" });
     res.json({ message: "Listing deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
