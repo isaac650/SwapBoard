@@ -98,3 +98,28 @@ Fields: `title`*, `category`*, `budget`, `description`, `contact`*, `fulfilled`.
 ## Technical Independence
 
 The `listings` and `requests` collections are fully independent. Each has its own router, validation, data shape, and copy of the category list, and neither imports from the other.
+
+## How to Use
+
+**Browsing listings:**
+- Visit the Listings page to see all available items
+- Use the category and type filters to narrow results
+- Use the search bar to find a specific item by keyword
+
+**Posting a listing:**
+- Click **+ Post a Listing**
+- Fill in the title, category, type (sell/swap/free), price, description, and your email
+- Click **Post Listing** — it appears instantly
+
+**Browsing requests:**
+- Click **Requests** in the nav to see what students are looking for
+- Filter by category to find relevant requests
+
+**Posting a request:**
+- Click **+ Post a Request**
+- Fill in what you need, category, budget, and your email
+- Click **Post Request**
+
+**Editing or deleting:**
+- Each card has **Edit** and **Delete** buttons
+- Requests also have a **Mark Fulfilled** button when found
