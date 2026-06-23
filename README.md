@@ -1,39 +1,40 @@
-SwapBoard
+# SwapBoard
 
 A campus marketplace where students buy, sell, swap, and request everyday items: textbooks, furniture, clothes, and electronics.
 
-Authors: Tony Zhang, Celine Isaacs
-Course: CS5610 Web Development, Northeastern University (class link)
+**Authors:** Tony Zhang, Celine Isaacs
+**Course:** CS5610 Web Development, Northeastern University ([class link](https://northeastern.instructure.com/courses/249954))
 
-🌐 Live Site: https://swapboard.onrender.com
-🎥 Demo Video: https://youtu.be/jDgG5kHXXsk
-📁 Design Mockups: Found in the design-mockups folder
-📄 Design Document: DESIGN.md
+🌐 **Live Site:** [https://swapboard.onrender.com](https://swapboard.onrender.com)
+🎥 **Demo Video:** [https://youtu.be/jDgG5kHXXsk](https://youtu.be/jDgG5kHXXsk)
+📁 **Design Mockups:** Found in the [design-mockups](./design-mockups) folder
+📄 **Design Document:** [DESIGN.md](./DESIGN.md)
 
-Show Image
+![SwapBoard listings page](screenshot.png)
 
-Tech Stack
+## Tech Stack
 
+- Frontend: vanilla JavaScript (ES6 modules), HTML, CSS
+- Backend: Node.js + Express (ESM)
+- Database: MongoDB (native driver)
+- Data requests: Fetch API
 
-Frontend: vanilla JavaScript (ES6 modules), HTML, CSS
-Backend: Node.js + Express (ESM)
-Database: MongoDB (native driver)
-Data requests: Fetch API
+## Setup
 
+Prerequisites: Node 18+ and MongoDB on `mongodb://localhost:27017` (or set `MONGO_URI` for Atlas).
 
-Setup
-
-Prerequisites: Node 18+ and MongoDB on mongodb://localhost:27017 (or set MONGO_URI for Atlas).
-
-bashcd files
+```bash
+cd files
 npm install
 npm run seed     # loads sample listings and requests
 npm start        # or: npm run dev  (auto-reload)
+```
 
 Open http://localhost:3000.
 
-Project Structure
+## Project Structure
 
+```
 SwapBoard/
 ├── files/
 │   ├── backend/
@@ -65,22 +66,35 @@ SwapBoard/
 ├── README.md
 ├── LICENSE
 └── screenshot.png
+```
 
-API
+## API
 
-Listings — /api/listings
+### Listings — `/api/listings`
 
-MethodPathDescriptionGET/api/listingsAll listings. Query: ?category= ?type= ?q=GET/api/listings/:idOne listingPOST/api/listingsCreatePATCH/api/listings/:idEditDELETE/api/listings/:idDelete
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/listings` | All listings. Query: `?category=` `?type=` `?q=` |
+| GET | `/api/listings/:id` | One listing |
+| POST | `/api/listings` | Create |
+| PATCH | `/api/listings/:id` | Edit |
+| DELETE | `/api/listings/:id` | Delete |
 
-Fields: title, category, type* (sell/swap/free), price (if sell), description, contact*.
+Fields: `title`*, `category`*, `type`* (sell/swap/free), `price` (if sell), `description`, `contact`*.
 Categories: Academic, Furniture, Clothing, Electronics, Other.
 
-Requests — /api/requests
+### Requests — `/api/requests`
 
-MethodPathDescriptionGET/api/requestsOpen requests. Query: ?category= ?showFulfilled=trueGET/api/requests/:idOne requestPOST/api/requestsCreatePATCH/api/requests/:idEdit, or set fulfilled: trueDELETE/api/requests/:idDelete
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/requests` | Open requests. Query: `?category=` `?showFulfilled=true` |
+| GET | `/api/requests/:id` | One request |
+| POST | `/api/requests` | Create |
+| PATCH | `/api/requests/:id` | Edit, or set `fulfilled: true` |
+| DELETE | `/api/requests/:id` | Delete |
 
-Fields: title, category, budget, description, contact*, fulfilled.
+Fields: `title`*, `category`*, `budget`, `description`, `contact`*, `fulfilled`.
 
-Technical Independence
+## Technical Independence
 
-The listings and requests collections are fully independent. Each has its own router, validation, data shape, and copy of the category list, and neither imports from the other.
+The `listings` and `requests` collections are fully independent. Each has its own router, validation, data shape, and copy of the category list, and neither imports from the other.
