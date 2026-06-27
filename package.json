@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Campus marketplace for students to buy, sell, swap, and request items",
   "type": "module",
+  //always a good idea to include more details about your project within the package.json file like license, author, github repo, homepage, etc
+  "license": "MIT",
+  "author": "Celine Isaacs"
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
