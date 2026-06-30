@@ -109,6 +109,15 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 65%;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Add hover effect to the contact link */
+
+.card__contact:hover {
+  text-decoration: underline;
+  color: var(--navy);
 }
 
 .card__time {

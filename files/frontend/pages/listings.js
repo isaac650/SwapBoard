@@ -27,7 +27,8 @@ function cardHtml(item) {
     <h3 class="card__title">${escHtml(item.title)}</h3>
     <p class="card__desc">${escHtml(item.description || "No description provided.")}</p>
     <div class="card__footer">
-      <span class="card__contact">&#9993; ${escHtml(item.contact)}</span>
+      <!-- Allow email to be clicked with a link -->
+      <a class="card__contact" href="mailto:${encodeURIComponent(item.contact)}">&#9993; ${escHtml(item.contact)}</a>
       <span class="card__time">${formatDate(item.createdAt)}</span>
     </div>
     <div class="card__actions">
@@ -114,7 +115,8 @@ function formHtml(item = {}) {
     </div>
     <div class="form__group">
       <label>Contact *</label>
-      <input name="contact" required value="${escHtml(item.contact || "")}" placeholder="your@email.edu" />
+      <!-- Set type to email to allow for validation -->
+      <input name="contact" type="email" required value="${escHtml(item.contact || "")}" placeholder="your@email.edu" />
     </div>
   `;
 }

@@ -20,25 +20,29 @@ async function loadRequests() {
   const params = {};
   if (currentCategory) params.category = currentCategory;
 
-  cachedRequests = await requestsAPI.getAll(params);
-  grid.innerHTML = "";
+  // Try-catch block to handle errors
+  // This is a good practice to avoid the program from crashing if there is an error
+  try {
+    cachedRequests = await requestsAPI.getAll(params);
+    grid.innerHTML = "";
 
-  if (!cachedRequests.length) {
-    empty.hidden = false;
-    return;
-  }
-  empty.hidden = true;
+    if (!cachedRequests.length) {
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
 
-  cachedRequests.forEach((r) => {
-    const card = document.createElement("article");
-    card.className = "card card--request";
-    card.innerHTML = `
+    cachedRequests.forEach((r) => {
+      const card = document.createElement("article");
+      card.className = "card card--request";
+      card.innerHTML = `
       <div class="card__category">${CATEGORY_ICONS[r.category]} ${r.category}</div>
       <h3 class="card__title">${escHtml(r.title)}</h3>
       ${r.budget ? `<div class="card__badge card__badge--budget">Budget: $${r.budget}</div>` : ""}
       <p class="card__desc">${escHtml(r.description || "No additional details.")}</p>
       <div class="card__footer">
-        <span class="card__contact">✉ ${escHtml(r.contact)}</span>
+        <!-- Allow email to be clicked with a link -->
+        <a class="card__contact" href="mailto:${encodeURIComponent(r.contact)}">✉ ${escHtml(r.contact)}</a>
         <span class="card__time">${formatDate(r.createdAt)}</span>
       </div>
       <div class="card__actions">
@@ -65,6 +69,10 @@ async function loadRequests() {
     .forEach((btn) =>
       btn.addEventListener("click", () => deleteRequest(btn.dataset.delete))
     );
+} catch (err) {
+  grid.innerHTML = "";
+  showToast(err.message, "error");
+}
 }
 
 function requestFormHtml(r = {}) {
@@ -92,7 +100,8 @@ function requestFormHtml(r = {}) {
     </div>
     <div class="form__group">
       <label>Contact *</label>
-      <input name="contact" required placeholder="your@email.edu" value="${escHtml(r.contact || "")}" />
+      <!-- Set type to email to allow for validation -->
+      <input name="contact" type="email" required placeholder="your@email.edu" value="${escHtml(r.contact || "")}" />
     </div>
   `;
 }
