@@ -61,6 +61,8 @@ export function buildCategoryOptions(selected = "") {
   ).join("");
 }
 
+let modalKeydownHandler = null;
+
 export function openModal(html) {
   let overlay = document.getElementById("modal-overlay");
   if (!overlay) {
@@ -76,6 +78,15 @@ export function openModal(html) {
     if (e.target === overlay) closeModal();
   });
   document.body.style.overflow = "hidden";
+
+  // Set up modal keydown handler defensively
+  if (modalKeydownHandler) {
+    document.removeEventListener("keydown", modalKeydownHandler);
+  }
+  modalKeydownHandler = (e) => {
+    if (e.key === "Escape") closeModal();
+  };
+  document.addEventListener("keydown", modalKeydownHandler);
 }
 
 export function closeModal() {
@@ -83,5 +94,9 @@ export function closeModal() {
   if (overlay) {
     overlay.classList.remove("modal-overlay--visible");
     document.body.style.overflow = "";
+  }
+  if (modalKeydownHandler) {
+    document.removeEventListener("keydown", modalKeydownHandler);
+    modalKeydownHandler = null;
   }
 }
